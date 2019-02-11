@@ -1,11 +1,5 @@
-import requests
-from bs4 import BeautifulSoup
+import newsrequest
+# -*- encoding: utf-8 -*-
+news = newsrequest.newsrequest()
 
-r = requests.get('https://www.haberler.com/')
-source = BeautifulSoup(r.content, "lxml")
-
-source.decode("utf-8")
-data = source.select(".second-news a[title]")
-
-for x in data:
-    print(x["title"])
+news.getNews()
