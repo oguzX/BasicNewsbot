@@ -1,5 +1,10 @@
 import newsrequest
-# -*- encoding: utf-8 -*-
+import time
+
 news = newsrequest.newsrequest()
 
-news.getNews()
+delay = 480
+
+while 1:
+    news.getNews(1,delay)
+    time.sleep(delay)
