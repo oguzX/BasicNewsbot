@@ -1,16 +1,20 @@
 from mysql.connector import connection
 
+import error
+
 
 class database:
     dbhost = "localhost"
     dbname = "news"
     dbusername = "root"
     dbpass = ""
+    dbport = 33066
 
     def __init__(self):
         self.dbconn = connection.MySQLConnection(host=self.dbhost, user=self.dbusername, password=self.dbpass,
-                                                 database=self.dbname)
+                                                 database=self.dbname,port=self.dbport)
         self.dbcursor = self.dbconn.cursor(buffered=True)
+        self.startUp()
 
     def query(self, query):
         type = (query.split())[0].lower()
@@ -51,6 +55,23 @@ class database:
     def getnum(self,table_name):
         sqlcommand = "SELECT count(*) FROM "+table_name
         return self.query(sqlcommand)
+
+    def startUp(self):
+        localQuery = "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '"+self.dbname+"'"
+        ret = self.query(localQuery)
+        if(not ret):
+            error.show("\""+self.dbname+"\" Database not exist, please try again after create one")
+
+    # def checkTable(self,tname):
+    #     checkQuery = "SELECT * FROM information_schema.tables WHERE table_schema = '"+self.dbname+"' AND table_name = '"+tname+"' LIMIT 1;"
+    #     ret = self.query(checkQuery)
+    #     if(not ret):
+    #         userRes = input(tname+" table not exist, Add? yes [y] no [n] ")
+    #         while(userRes != 'n' or userRes != 'y'):
+    #             if (userRes.lower() == 'y'):
+    #                 createTableQuery = "CREATE TABLE "+tname+" "
+    #             elif (userRes.lower() == 'n'):
+    #                 break;
 
     def __del__(self):
         self.dbconn.close()

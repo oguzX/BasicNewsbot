@@ -1,0 +1,27 @@
+[
+  {
+    "table_name": "all_news",
+    "column": [{
+      "title": "news_id",
+      "type": "id",
+      "length": 70,
+      "primarykey": 1
+    },{
+      "title": "news_title",
+      "type": "varchar",
+      "length": 70
+    },{
+      "title": "news_site",
+      "type": "varchar",
+      "length": 100
+    },{
+      "title": "news_link",
+      "type": "varchar",
+      "length": 500
+    },{
+      "title": "news_image",
+      "type": "varchar",
+      "length": 255
+    }]
+  }
+]
