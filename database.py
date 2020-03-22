@@ -7,14 +7,18 @@ class database:
     dbhost = "localhost"
     dbname = "news"
     dbusername = "root"
-    dbpass = ""
-    dbport = 33066
+    dbpass = "root"
+    dbport = 3306
 
     def __init__(self):
-        self.dbconn = connection.MySQLConnection(host=self.dbhost, user=self.dbusername, password=self.dbpass,
-                                                 database=self.dbname,port=self.dbport)
-        self.dbcursor = self.dbconn.cursor(buffered=True)
-        self.startUp()
+        try:
+            self.dbconn = connection.MySQLConnection(host=self.dbhost, user=self.dbusername, password=self.dbpass,
+                                                     database=self.dbname, port=self.dbport)
+            self.dbcursor = self.dbconn.cursor(buffered=True)
+            self.startUp()
+        except connection.errors.Error as err:
+            error.dbError('Connection error: {}'.format(err))
+
 
     def query(self, query):
         type = (query.split())[0].lower()
@@ -22,6 +26,8 @@ class database:
         self.dbconn.commit()
         if type == "select":
             return self.dbcursor.fetchone()
+        else:
+            return self.dbcursor.execute(query)
 
     def insert(self, tablename, var, notexist=[]):
         sqlcommand = "INSERT INTO " + tablename + " "
@@ -57,21 +63,19 @@ class database:
         return self.query(sqlcommand)
 
     def startUp(self):
-        localQuery = "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '"+self.dbname+"'"
-        ret = self.query(localQuery)
-        if(not ret):
-            error.show("\""+self.dbname+"\" Database not exist, please try again after create one")
+        self.checkTable('all_news')
 
-    # def checkTable(self,tname):
-    #     checkQuery = "SELECT * FROM information_schema.tables WHERE table_schema = '"+self.dbname+"' AND table_name = '"+tname+"' LIMIT 1;"
-    #     ret = self.query(checkQuery)
-    #     if(not ret):
-    #         userRes = input(tname+" table not exist, Add? yes [y] no [n] ")
-    #         while(userRes != 'n' or userRes != 'y'):
-    #             if (userRes.lower() == 'y'):
-    #                 createTableQuery = "CREATE TABLE "+tname+" "
-    #             elif (userRes.lower() == 'n'):
-    #                 break;
+    def checkTable(self,tname):
+        checkQuery = "SELECT * FROM information_schema.tables WHERE table_schema = '"+self.dbname+"' AND table_name = '"+tname+"' LIMIT 1;"
+        ret = self.query(checkQuery)
+        if(not ret):
+            userRes = input(tname+" table not exist, Create? yes [y] no [n] ")
+            if (userRes.lower() == 'y'):
+                createTableQuery = "CREATE TABLE "+tname+" (news_id integer PRIMARY KEY auto_increment, news_title VARCHAR(255), news_site VARCHAR(180), news_link TEXT, news_image VARCHAR(255))"
+                self.query(createTableQuery)
 
     def __del__(self):
-        self.dbconn.close()
+        try:
+            self.dbconn.close()
+        except AttributeError as err:
+            error.dbError(format(err))
